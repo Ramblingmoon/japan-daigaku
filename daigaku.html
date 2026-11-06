@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>我的大學生活｜AI 日文提示詞產生器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef3f2;--card:#fff;--field:#f6f9f8;--ink:#12332f;--sub:#56706c;--line:#d3e0dd;--red:#0e7c72;--err:#c0392b;--navy:#12332f;--on:#fff;--mus:#f0b429;--hdr:#12332f;--hdrink:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1b19;--card:#172825;--field:#10201e;--ink:#e3f1ee;--sub:#97b3ae;--line:#274340;--red:#4fd1c0;--err:#ff8a7a;--navy:#e3f1ee;--on:#0f1b19;--mus:#f0b429;--hdr:#172825;--hdrink:#e3f1ee}}
+*{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;color:var(--ink);background:var(--bg);font:16px/1.75 "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
+main{max-width:760px;margin:0 auto;padding:0 14px 70px}
+.serif{font-family:"Zen Maru Gothic","Noto Sans JP","Hiragino Maru Gothic ProN","Noto Sans TC",sans-serif}
+header{background:var(--hdr);color:var(--hdrink);margin:0 0 26px;padding:34px 22px 28px;border-bottom:6px solid var(--mus)}
+header>*{max-width:760px;margin-left:auto;margin-right:auto}
+header h1{margin:0;font-size:2.1rem;line-height:1.3;font-weight:700}
+header p{margin:8px auto 0;opacity:.8}
+.step{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 20px 20px 74px;margin-bottom:18px}
+.step::before{content:"";position:absolute;left:41px;top:70px;bottom:-19px;width:2px;background:var(--line)}
+.step:last-of-type::before{display:none}
+.hd{margin-bottom:14px}
+.seal{position:absolute;left:18px;top:18px;width:46px;height:46px;border-radius:50%;background:var(--red);color:var(--on);display:grid;place-items:center;font-size:1.35rem;font-weight:700}
+.hd h2{margin:0;font-size:1.25rem;line-height:1.3;padding-top:2px}
+.hd small{display:block;color:var(--sub);font-size:.88rem;font-family:"Noto Sans TC","PingFang TC",sans-serif;font-weight:400;margin-top:2px}
+@media (max-width:540px){.step{padding:70px 16px 18px}.step::before{display:none}}
+.grp{margin:0 0 16px}
+.grp h3{margin:0 0 8px;font-size:1rem;display:flex;align-items:center;gap:8px}
+.grp h3::before{content:"";width:6px;height:18px;border-radius:3px;background:var(--mus)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+@media (max-width:540px){.row{grid-template-columns:1fr}}
+label{display:block;font-size:.88rem;color:var(--sub)}
+input[type=text],select,textarea{width:100%;margin-top:3px;padding:9px 11px;font:inherit;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:8px}
+:focus-visible{outline:3px solid var(--mus);outline-offset:1px}
+button,.btn{display:inline-block;font:inherit;font-weight:700;padding:12px 20px;border-radius:999px;border:1px solid transparent;cursor:pointer;text-decoration:none;text-align:center}
+.red{background:var(--red);color:var(--on)}.navy{background:var(--navy);color:var(--on)}.ghost{background:transparent;color:var(--ink);border-color:var(--ink)}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.bar>*{flex:1 1 150px}
+.opt{display:flex;gap:18px;flex-wrap:wrap;margin:8px 0 4px}
+.opt label{display:flex;gap:6px;align-items:center;color:var(--ink);font-size:.95rem}
+textarea{min-height:130px;resize:vertical}
+#prompt{min-height:360px;font:.86rem/1.6 ui-monospace,Menlo,Consolas,monospace}
+.note{font-size:.88rem;color:var(--sub);margin:6px 0}
+#err{color:var(--err);min-height:1.3em;font-size:.92rem}
+ol.how{margin:0 0 6px;padding-left:1.2em}
+#qr{display:grid;justify-items:center;gap:8px;margin-top:12px}
+#qr canvas,#qr img{background:#fff;padding:8px;border-radius:8px}
+hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+</style>
+</head>
+<body>
+<header>
+<h1 class="serif">わたしの<br>だいがくせいかつ</h1>
+<p>我的大學生活・AI 日文提示詞產生器</p>
+</header>
+<main>
+
+<div class="step">
+<div class="hd"><div class="seal serif">一</div><h2 class="serif">じょうほうを かく<small>STEP 1・用中文填寫你的一天</small></h2></div>
+<div id="form"></div>
+<div id="err" role="alert"></div>
+<div class="bar"><button id="fill" class="ghost">帶入範例</button></div>
+</div>
+
+<div class="step">
+<div class="hd"><div class="seal serif">二</div><h2 class="serif">プロンプトを つくる<small>STEP 2・產生給 ChatGPT 的提示詞</small></h2></div>
+<div class="opt"><label><input type="checkbox" id="oRomaji">附羅馬拼音</label><label><input type="checkbox" id="oTrans">附中文翻譯</label></div>
+<div class="bar"><button id="gen" class="red">產生提示詞</button></div>
+<div id="out" hidden>
+<textarea id="prompt" readonly aria-label="提示詞"></textarea>
+<div class="bar"><button id="copy" class="navy">一鍵複製</button></div>
+</div>
+</div>
+
+<div class="step">
+<div class="hd"><div class="seal serif">三</div><h2 class="serif">ChatGPT に はる<small>STEP 3・貼到 ChatGPT</small></h2></div>
+<ol class="how"><li>打開 ChatGPT。</li><li>把剛剛複製的提示詞貼上，送出。</li><li>等它寫完日文短文，整段複製下來，進入 STEP 4。</li></ol>
+<div class="bar"><a class="btn ghost" href="https://chatgpt.com/" target="_blank" rel="noopener">開啟 ChatGPT</a></div>
+</div>
+
+<div class="step" id="s4">
+<div class="hd"><div class="seal serif">四</div><h2 class="serif">はつおん れんしゅう<small>STEP 4・發音練習，把 ChatGPT 的回答貼回這裡</small></h2></div>
+<p class="note">貼上完整回答，按「開始朗讀」會唸出日文的部分，自動略過羅馬拼音與中文翻譯。</p>
+<textarea id="speech" placeholder="請把 ChatGPT 的回答貼在這裡……" aria-label="ChatGPT 的回答"></textarea>
+<label style="margin-top:10px">朗讀速度
+<select id="rate"><option value=".7">慢速</option><option value=".9" selected>正常速度</option><option value="1.1">稍快</option></select></label>
+<div class="bar"><button id="play" class="red">開始朗讀</button><button id="stop" class="ghost">停止</button></div>
+<p class="note" id="sNote"></p>
+<hr>
+<p class="note">想用手機聽、練習自己的發音？貼上文字後產生 QR Code，用手機掃描就能直接開啟並繼續朗讀。</p>
+<button id="mkqr" class="navy" style="width:100%">產生 QR Code</button>
+<div id="qr"></div>
+</div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// t=文字 h=整點 d=星期 s=交通工具
+const G=[
+["自己紹介",[["name","你的名字","t","王小明"],["hometown","你來自哪裡","t","花蓮"]]],
+["朝",[["wake","每天幾點起床","h",7],["depart","幾點出門去大學","h",8],["trans","怎麼去大學","s"]]],
+["午前",[["amS","上午幾點開始","h",9],["amE","到幾點","h",12],["amAct","做什麼","t","讀書"],["d1","上課的星期（一）","d",0],["d2","上課的星期（二）","d",2],["subj","學什麼","t","日文"]]],
+["昼休み",[["lWho","和誰","t","朋友"],["lPlace","在哪裡","t","餐廳"],["lAct","做什麼","t","吃飯"],["lExtra","有時也做什麼","t","喝咖啡"]]],
+["午後・夜",[["pPlace","下午在哪裡","t","圖書館"],["pAct","做什麼","t","看書"],["home","幾點回家","h",5],["nAct","晚上做什麼","t","做作業"],["sleep","幾點睡覺","h",11]]],
+["週末",[["sWho","星期六和誰","t","朋友"],["sPlace","去哪裡","t","臺北"],["sAct","在那裡做什麼（含地點）","t","在百貨公司購物"],["uAct","星期日做什麼（含地點）","t","在家聽音樂"]]]
+];
+const TR=["搭巴士","搭電車","騎腳踏車","搭計程車","走路"],DC="一二三四五六日";
+const $=id=>document.getElementById(id);
+const ids=G.flatMap(g=>g[1]);
+
+G.forEach(([title,fs])=>{
+  const s=document.createElement("div");s.className="grp";
+  let h=`<h3 class="serif">${title}</h3><div class="row">`;
+  fs.forEach(([id,lab,type,def])=>{
+    let c;
+    if(type==="t")c=`<input id="${id}" type="text" placeholder="例：${def}" autocomplete="off">`;
+    else if(type==="h")c=`<select id="${id}">`+[...Array(12)].map((_,i)=>`<option value="${i+1}"${i+1===def?" selected":""}>${i+1} 點</option>`).join("")+`</select>`;
+    else if(type==="d")c=`<select id="${id}">`+[...DC].map((x,i)=>`<option value="星期${x}"${i===def?" selected":""}>星期${x}</option>`).join("")+`</select>`;
+    else c=`<select id="${id}">`+TR.map(t=>`<option>${t}</option>`).join("")+`</select>`;
+    h+=`<label>${lab}${c}</label>`;
+  });
+  s.innerHTML=h+"</div>";$("form").appendChild(s);
+});
+
+$("fill").onclick=()=>{ids.forEach(([id,,t,def])=>{if(t==="t")$(id).value=def});$("err").textContent=""};
+
+$("gen").onclick=()=>{
+  const v={};ids.forEach(([id])=>v[id]=$(id).value.trim());
+  const miss=ids.filter(([id,,t])=>t==="t"&&!v[id]).map(a=>a[1]);
+  if(miss.length){$("err").textContent="還沒填：「"+miss.join("」「")+"」";$("err").scrollIntoView({block:"center"});return}
+  if(v.d1===v.d2){$("err").textContent="兩個上課的星期不能相同";return}
+  $("err").textContent="";
+  const go=v.trans==="走路"?"走路去大學":`${v.trans}去大學`;
+  const info=[
+`姓名：${v.name}`,
+`家鄉：${v.hometown}`,
+`起床：每天早上${v.wake}點起床`,
+`去大學：${v.depart}點，${go}`,
+`上午：${v.amS}點到${v.amE}點，${v.amAct}`,
+`上課：${v.d1}和${v.d2}學${v.subj}`,
+`午休：和${v.lWho}在${v.lPlace}${v.lAct}`,
+`午休有時也：${v.lExtra}`,
+`下午：在${v.pPlace}${v.pAct}`,
+`回家：${v.home}點回家`,
+`晚上：${v.nAct}`,
+`睡覺：${v.sleep}點睡覺`,
+`星期六：和${v.sWho}去${v.sPlace}，${v.sAct}`,
+`星期日：${v.uAct}`
+].map((s,i)=>`${i+1}. ${s}`).join("\n");
+
+  const rom=$("oRomaji").checked,tr=$("oTrans").checked;
+  const fmt=rom
+?`- 輸出格式採用「一句為單位，第一行寫日文句子，第二行寫該句的羅馬拼音（平文式／Hepburn式）」，兩者交錯排列。`
+:`- 只輸出日文，一句一行，不要附羅馬拼音。`;
+  const p=`你是一位日文老師。請根據以下學生填寫的資訊，寫一篇主題為「我的大學生活」、適合日文初學者的日文短文。
+
+【學生資訊】
+${info}
+
+【條件】
+- 日文難度請嚴格控制在《大家的日本語》第1課到第6課的句型（動詞ます形、〜を〜ます、〜で、〜と、〜へ いきます、〜から〜まで、時間＋に）。
+- 若學生填的內容超出第1～6課範圍，請改用最接近、且符合第1～6課的動詞（ます形）來表達。
+- 短文的順序固定：標題「我的大學生活」→ 我是（姓名）→ 我來自（家鄉）→ 我是元智大學的學生 → 每天早上幾點起床 → 幾點怎麼去大學 → 上午幾點到幾點做什麼 → 星期幾和星期幾學什麼 → 午休時做什麼 → 有時也做什麼 → 下午做什麼 → 幾點回家 → 晚上做什麼 → 幾點睡覺 → 星期六做什麼 → 星期日做什麼。
+- 每個項目寫成一句，不要增加或刪減句子，也不要加入學生沒填的內容。
+- 請全部使用平假名書寫，不要使用漢字；外來語、人名與地名請用片假名。
+- 詞與詞之間請加一個半形空格（分詞書寫）。
+- 時間的讀音請特別小心（例如4點是「よじ」、7點是「しちじ」、9點是「くじ」）。
+${fmt}
+${tr?"- 最後請附上整篇短文的中文翻譯。":"- 不需要附中文翻譯，也不要加任何說明文字，只輸出日文短文。"}
+
+請依照以上條件，寫出這篇短文。`;
+  $("prompt").value=p;$("out").hidden=false;$("out").scrollIntoView({behavior:"smooth",block:"start"});
+};
+
+$("copy").onclick=async()=>{
+  const t=$("prompt");
+  try{await navigator.clipboard.writeText(t.value)}catch(e){t.select();document.execCommand("copy")}
+  $("copy").textContent="已複製 ✓";setTimeout(()=>$("copy").textContent="一鍵複製",1800);
+};
+
+// ---- STEP 4：朗讀 ----
+const synth=window.speechSynthesis;
+function jpLines(txt){
+  return txt.split(/\n+/).map(s=>s.replace(/[*#>`_]/g,"").trim())
+    .filter(s=>/[\u3040-\u30ff]/.test(s));
+}
+$("play").onclick=()=>{
+  if(!synth){$("sNote").textContent="這個瀏覽器不支援朗讀，請改用 Chrome 或 Safari。";return}
+  const L=jpLines($("speech").value);
+  if(!L.length){$("sNote").textContent="沒有找到日文，請先貼上 ChatGPT 的回答。";return}
+  synth.cancel();
+  const vs=synth.getVoices(),vo=vs.find(x=>/^ja/i.test(x.lang));
+  $("sNote").textContent=vo?`朗讀中：共 ${L.length} 句`:"找不到日文語音，聲音可能不正確。";
+  L.forEach(s=>{const u=new SpeechSynthesisUtterance(s);u.lang="ja-JP";u.rate=+$("rate").value;if(vo)u.voice=vo;synth.speak(u)});
+};
+$("stop").onclick=()=>{if(synth)synth.cancel();$("sNote").textContent=""};
+if(synth)synth.getVoices();
+
+// ---- QR Code：把日文句子編進網址 ----
+const enc=s=>btoa(unescape(encodeURIComponent(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const dec=s=>decodeURIComponent(escape(atob(s.replace(/-/g,"+").replace(/_/g,"/"))));
+$("mkqr").onclick=()=>{
+  const L=jpLines($("speech").value);
+  const q=$("qr");q.innerHTML="";
+  if(!L.length){q.textContent="請先貼上 ChatGPT 的回答。";return}
+  if(typeof QRCode==="undefined"){q.textContent="QR Code 元件載入失敗，請檢查網路。";return}
+  const url=location.href.split("#")[0]+"#t="+enc(L.join("\n"));
+  if(url.length>2000){q.textContent="文字太長，無法做成 QR Code。";return}
+  new QRCode(q,{text:url,width:220,height:220,correctLevel:QRCode.CorrectLevel.L});
+  const n=document.createElement("p");n.className="note";n.textContent="用手機相機掃描，開啟後按「開始朗讀」。";q.appendChild(n);
+};
+try{
+  const m=location.hash.match(/^#t=(.+)$/);
+  if(m){$("speech").value=dec(m[1]);setTimeout(()=>$("s4").scrollIntoView(),100)}
+}catch(e){}
+</script>
+</body>
+</html>
