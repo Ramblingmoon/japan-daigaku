@@ -65,7 +65,7 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}
 
 <div class="step">
 <div class="hd"><div class="seal serif">二</div><h2 class="serif">プロンプトを つくる<small>STEP 2・產生給 ChatGPT 的提示詞</small></h2></div>
-<div class="opt"><label><input type="checkbox" id="oRomaji">附羅馬拼音</label><label><input type="checkbox" id="oTrans">附中文翻譯</label></div>
+<div class="opt"><label><input type="checkbox" id="oRomaji" checked>附羅馬拼音</label><label><input type="checkbox" id="oTrans" checked>附中文翻譯</label></div>
 <div class="bar"><button id="gen" class="red">產生提示詞</button></div>
 <div id="out" hidden>
 <textarea id="prompt" readonly aria-label="提示詞"></textarea>
@@ -91,6 +91,7 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}
 <p class="note">想用手機聽、練習自己的發音？貼上文字後產生 QR Code，用手機掃描就能直接開啟並繼續朗讀。</p>
 <button id="mkqr" class="navy" style="width:100%">產生 QR Code</button>
 <div id="qr"></div>
+<p class="note" id="alt"></p>
 </div>
 </main>
 
@@ -107,7 +108,7 @@ const G=[
 ["午後・夜",[["pPlace","下午在哪裡","t","圖書館"],["pAct","做什麼","t","看書"],["home","幾點回家","h",5],["nAct","晚上做什麼","t","做作業"],["sleep","幾點睡覺","h",11]]],
 ["週末",[["sWho","星期六和誰","t","朋友"],["sPlace","去哪裡","t","臺北"],["sAct","在那裡做什麼（含地點）","t","在百貨公司購物"],["uAct","星期日做什麼（含地點）","t","在家聽音樂"]]]
 ];
-const TR=["搭巴士","搭電車","騎腳踏車","搭計程車","走路"],DC="一二三四五六日";
+const TR=["搭巴士","搭電車","騎腳踏車","騎摩托車","搭計程車","走路"],DC="一二三四五六日";
 const $=id=>document.getElementById(id);
 const ids=G.flatMap(g=>g[1]);
 
@@ -265,7 +266,16 @@ $("mkqr").onclick=async()=>{
   const nt=document.createElement("p");nt.className="note";
   nt.textContent="用手機相機掃描即可（相簿截圖也可以）。開啟後會看到日文與自動產生的羅馬拼音，可按「開始朗讀」。掃不到的話，複製下面的連結傳到手機。";q.appendChild(nt);
   const inp=document.createElement("input");inp.type="text";inp.readOnly=true;inp.value=url;inp.onclick=()=>inp.select();q.appendChild(inp);
+  const bar=document.createElement("div");bar.className="bar";bar.style.width="100%";
+  const cp=document.createElement("button");cp.className="navy";cp.textContent="複製連結";
+  cp.onclick=async()=>{try{await navigator.clipboard.writeText(url)}catch(e){inp.select();document.execCommand("copy")}cp.textContent="已複製 ✓";setTimeout(()=>cp.textContent="複製連結",1800)};
+  bar.appendChild(cp);
+  if(navigator.share){const sh=document.createElement("button");sh.className="ghost";sh.textContent="分享到手機／LINE";sh.onclick=()=>navigator.share({title:"我的大學生活",url}).catch(()=>{});bar.appendChild(sh)}
+  q.appendChild(bar);
 };
+(()=>{const u=baseUrl(),a=$("alt");
+  a.innerHTML="掃不出來也沒關係：用手機瀏覽器直接打開 <a href=\""+u+"\" target=\"_blank\" rel=\"noopener\"></a>，把 ChatGPT 的回答貼到這個 STEP 4，一樣可以朗讀；或按上面「複製連結」，用 LINE 傳給自己再打開。";
+  a.querySelector("a").textContent=u})();
 (async()=>{
   try{
     const m=location.hash.match(/^#t=([zp][A-Za-z0-9_-]+)$/);
